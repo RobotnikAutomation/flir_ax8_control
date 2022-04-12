@@ -77,36 +77,36 @@ class Flir:
         return urllib2.urlopen(self.baseURL+'res.php',urllib.urlencode({'action':'get','resource':resource})).read()
 
     def setIRMode(self):
-        f.setResource('.image.sysimg.fusion.fusionData.fusionMode',1)
-        f.setResource('.image.sysimg.fusion.fusionData.useLevelSpan',1)
+        self.setResource('.image.sysimg.fusion.fusionData.fusionMode',1)
+        self.setResource('.image.sysimg.fusion.fusionData.useLevelSpan',1)
 
     def setVisualMode(self):
-        f.setResource('.image.sysimg.fusion.fusionData.fusionMode',1)
-        f.setResource('.image.sysimg.fusion.fusionData.useLevelSpan',0)
+        self.setResource('.image.sysimg.fusion.fusionData.fusionMode',1)
+        self.setResource('.image.sysimg.fusion.fusionData.useLevelSpan',0)
 
     def setMSXMode(self):
-        f.setResource('.image.sysimg.fusion.fusionData.fusionMode',3)
+        self.setResource('.image.sysimg.fusion.fusionData.fusionMode',3)
 
     def setTemperatureRange(self,minTemp, maxTemp):
-        f.setResource('.image.contadj.adjMode', 'manual')
-        f.setResource('.image.sysimg.basicImgData.extraInfo.lowT',CtoK(minTemp))
-        f.setResource('.image.sysimg.basicImgData.extraInfo.highT',CtoK(maxTemp))
+        self.setResource('.image.contadj.adjMode', 'manual')
+        self.setResource('.image.sysimg.basicImgData.extraInfo.lowT',CtoK(minTemp))
+        self.setResource('.image.sysimg.basicImgData.extraInfo.highT',CtoK(maxTemp))
     
     def showOverlay(self,show=True):
         if show:
-            f.setResource('.resmon.config.hideGraphics','false')
+            self.setResource('.resmon.config.hideGraphics','false')
         else:
-            f.setResource('.resmon.config.hideGraphics','true')
+            self.setResource('.resmon.config.hideGraphics','true')
 
     def light(self,on=True):
         if on:
-            f.setResource('.system.vcam.torch','true')
+            self.setResource('.system.vcam.torch','true')
         else:
-            f.setResource('.system.vcam.torch','false')
+            self.setResource('.system.vcam.torch','false')
 
     def setPalette(self, palette):
         # iron.pal, bw.pal, rainbow.pal
-        f.setResource('.image.sysimage.palette.readFile',palette)
+        self.setResource('.image.sysimage.palette.readFile',palette)
 
     def getBox(self,boxNumber):
         ret = {}
