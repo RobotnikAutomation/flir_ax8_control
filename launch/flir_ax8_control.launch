@@ -1,25 +1,10 @@
 <?xml version="1.0"?>
 <launch>
+  <arg name="ip_address" default="192.168.0.185" />
 
-	<!-- Set namespace -->
-	<!--arg name="id_robot" default="robot"/-->
-
-	<!-- Desired frequency -->
-	<arg name="desired_freq" default="1.0" />
-	<!-- Name of the example of a subscriber -->
-	<arg name="example_subscriber_name" default="example" />
-
-	<!-- Load .yaml example -->
-	<!-- <rosparam file="$(find flir_ax8_re_control)/config/example.yaml" command="load" /> -->
-
-	<!--group ns="$(arg id_robot)"-->
-
-		<!-- start FlirAx8RemoteControl node -->
-		<node name="flir_ax8_control" pkg="flir" type="flir_ax8_control_node.py" output="screen" respawn="false">
-			<param name="desired_freq" value="$(arg desired_freq)"/>
-			<param name="example_subscriber_name" value="$(arg example_subscriber_name)"/>
-		</node>
-
-	<!--/group-->
+  <!-- start FlirAx8RemoteControl node -->
+  <node name="flir_ax8_control" pkg="flir" type="flir_ax8_control_node.py" output="screen" respawn="false">
+      <param name="ip_address" value="$(arg ip_address)"/>
+  </node>
 
 </launch>
