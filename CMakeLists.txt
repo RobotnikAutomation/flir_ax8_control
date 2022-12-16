@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(flir)
+project(flir_ax8_control)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -9,7 +9,6 @@ project(flir)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
-  sensor_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -53,11 +52,10 @@ catkin_python_setup()
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+#add_service_files(
+#  FILES
+#  GetSpotTemperature.srv
+#)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -67,10 +65,9 @@ catkin_python_setup()
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   sensor_msgs
-# )
+#generate_messages(
+#  DEPENDENCIES
+#)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -103,8 +100,8 @@ catkin_python_setup()
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES flir
-#  CATKIN_DEPENDS rospy sensor_msgs
+#  LIBRARIES flir_ax8_control
+#  CATKIN_DEPENDS message_runtime
 #  DEPENDS system_lib
 )
 
@@ -121,7 +118,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/flir.cpp
+#   src/${PROJECT_NAME}/flir_ax8_control.cpp
 # )
 
 ## Add cmake target dependencies of the library
