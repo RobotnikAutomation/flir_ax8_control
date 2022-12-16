@@ -7,7 +7,7 @@ from flir_ax8_control import FlirAx8Control
 
 def main():
 
-    rospy.init_node("flir_ax8_control_node")
+    rospy.init_node("flir_ax8_node")
 
     rc_node = FlirAx8Control()
 

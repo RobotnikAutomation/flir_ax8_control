@@ -66,9 +66,14 @@ See also: BasicICD.pdf
 def CtoK(temp):
     return temp+273.15
 
+def KtoC(temp):
+    return temp-273.15
+
 class Flir:
-    def __init__(self, baseURL='http://192.168.100.6/'):
+    def __init__(self, baseURL='http://192.168.100.6/', maxBoxes=6, maxAlarms=5):
         self.baseURL = baseURL
+        self.maxBoxes = maxBoxes
+        self.maxAlarams = maxAlarms
 
     def setResource(self,resource,value):
         return urllib2.urlopen(self.baseURL+'res.php',urllib.urlencode({'action':'set','resource':resource,'value':value})).read()
@@ -91,6 +96,18 @@ class Flir:
         self.setResource('.image.contadj.adjMode', 'manual')
         self.setResource('.image.sysimg.basicImgData.extraInfo.lowT',CtoK(minTemp))
         self.setResource('.image.sysimg.basicImgData.extraInfo.highT',CtoK(maxTemp))
+    
+    def getTemperatureValue(self, x=0, y=0):
+        self.setResource('.image.sysimg.measureFuncs.spot.1.active','true')
+        self.setResource('.image.sysimg.measureFuncs.spot.1.x',x)
+        self.setResource('.image.sysimg.measureFuncs.spot.1.y',y)
+        value = self.getResource('.image.sysimg.measureFuncs.spot.1.valueT')
+        return float(value[1:-2])
+    
+    def getSpotTemperatureValue(self, spot):
+        resource = '.image.sysimg.measureFuncs.spot.%d'%(spot)
+        value = self.getResource(resource+'.valueT')
+        return float(value[1:-2])
     
     def showOverlay(self,show=True):
         if show:
@@ -121,8 +138,24 @@ class Flir:
 
     def getBoxes(self):
         ret = []
-        for i in range(1,7):
+        for i in range(1,self.maxBoxes+1):
             ret.append(self.getBox(i))
+        return ret
+    
+    def getAlarm(self, alarmNumber):
+        ret = {}
+        ans = str(alarmNumber)
+        ret['alarmNumber']=alarmNumber
+        for field in ['type','active','trigged']:
+            ret[field] = self.getResource('.resmon.items.'+ans+'.'+field)
+        
+        return ret
+
+    def getAlarms(self):
+        ret = []
+        for i in range (1, self.maxAlarams + 1):
+            ret.append(self.getAlarm(i))           
+        
         return ret
 
 if __name__ == '__main__':
