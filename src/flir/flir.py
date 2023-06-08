@@ -70,7 +70,7 @@ def KtoC(temp):
     return temp-273.15
 
 class Flir:
-    def __init__(self, baseURL='http://192.168.100.6/', maxBoxes=6, maxAlarms=5):
+    def __init__(self, baseURL='http://192.168.0.211/', maxBoxes=6, maxAlarms=5):
         self.baseURL = baseURL
         self.maxBoxes = maxBoxes
         self.maxAlarams = maxAlarms
@@ -125,7 +125,7 @@ class Flir:
         # iron.pal, bw.pal, rainbow.pal
         self.setResource('.image.sysimage.palette.readFile',palette)
 
-    def getBox(self,boxNumber):
+    def getBox(self, boxNumber):
         ret = {}
         bns = str(boxNumber)
         ret['boxNumber']=boxNumber
@@ -158,6 +158,53 @@ class Flir:
         
         return ret
 
+    def getSnapshot(self, jpgfile):
+
+        startTime = time.time()
+
+        dateTime = datetime.datetime.now()
+        filename = "img-" + str(dateTime.year) + str(dateTime.month) + str(dateTime.day) + "-" + str(dateTime.hour) + str(dateTime.minute) + str(dateTime.second) + ".jpg"
+
+        self.setResource('.image.services.store.format','JPEG')
+        self.setResource('.image.services.store.overlay','true')
+        self.setResource('.image.services.store.owerwrite','true')
+        self.setResource('.image.services.store.fileNameW','/FLIR/images/' + filename)
+        self.setResource('.image.services.store.commit','true')
+        fh = open(jpgfile, "wb")
+        
+        ready = False
+
+        print("Getting image from camera")
+        while not(ready):
+            response = session.get(self.baseURL + 'storage/download/image/' + filename, allow_redirects=True)
+
+            #if response.status_code == 404:
+            #    print(response.text)
+            #    #f.login()
+            #el
+            if response.status_code == requests.codes.ok:
+                ready = True
+                fh.write(response.content)
+            else:
+                time.sleep(0.3)
+                response = session.get(self.baseURL + 'download.php', data={'file':'/FLIR/images/' + filename}, allow_redirects=True)
+
+        fh.close()
+
+        print("Deleting picture: " + filename)
+        message = session.post(self.baseURL + 'storage/delete/image/' + filename)
+
+        if ('login' in message.text):
+            print("Need to log in first")
+            self.login()
+
+            message = session.post(self.baseURL + 'storage/delete/image/' + filename)
+
+        end = time.time()
+
+        print("Downloaded image " + jpgfile + " from camera in " + str(end-start) + " s.")
+
+
 if __name__ == '__main__':
     import sys
     f = Flir()
@@ -177,5 +224,6 @@ if __name__ == '__main__':
         f.setTemperatureRange(20,45)
         f.showOverlay(False)
         f.setPalette('bw.pal')
+        f.getSnapshot('test.png')
 
     

@@ -67,6 +67,7 @@ class FlirAx8Control(RComponent):
         self.show_overlay_srv = rospy.Service('~turn_light', SetBool, self.turn_light_cb)
         self.get_spot_temp_srv = rospy.Service('~get_spot_temperature', GetSpotTemperature, self.get_spot_temp_cb)
         self.set_palette_srv = rospy.Service('~set_palette', SetPalette, self.set_palette_cb)
+        self.get_snapshot_srv = rospy.Service('~get_snapshot', Trigger, self.get_snapshot_cb)
 
         return 0
 
@@ -146,6 +147,20 @@ class FlirAx8Control(RComponent):
             response.success = False
             msg = str(error)
             rospy.logerr("%s::set_visual_mode_cb:: %s" % (self._node_name, error))
+
+        response.message = msg
+        return response
+
+    def get_snapshot_cb(self, req):
+        response = TriggerResponse()
+        response.success = True
+
+        msg = ""
+        try:
+            self.flir.getSnapshot('/home/robot/test.png')
+
+        except:
+            response.success = False
 
         response.message = msg
         return response
