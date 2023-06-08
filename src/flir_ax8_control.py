@@ -278,6 +278,10 @@ class FlirAx8Control(RComponent):
                 boxes_msg.boxes.append(box_msg)
             except KeyError as e:
                 continue
+            
+            except ValueError as error:
+                rospy.logwarn_throttle(2, "%s::update_boxes:: %s" % (self._node_name, error))
+                continue
         
         self.boxes_msg = boxes_msg
         self.t_boxes_updater = threading.Timer(0.2, self.update_boxes)
