@@ -1,32 +1,47 @@
-#!/usr/bin/env python
+tempData = {'t':[],'min':[],'avg':[],'max':[]}
+def callback(data):
 
-import rospy
+import rclpy
+from rclpy.node import Node
 from std_msgs.msg import String
 import matplotlib.pyplot as plt
 import datetime
 import json
 
-tempData = {'t':[],'min':[],'avg':[],'max':[]}
+class FlirGraphNode(Node):
+    def __init__(self):
+        super().__init__('flir_graph')
+        self.tempData = {'t':[],'min':[],'avg':[],'max':[]}
+        plt.ion()
+        self.subscription = self.create_subscription(
+            String,
+            'udp/flir_engine',
+            self.callback,
+            10)
 
-plt.ion()
+    def callback(self, data):
+        boxes = json.loads(data.data)
+        b = boxes[0]
+        print(b['minT'], b['avgT'], b['maxT'])
+        self.tempData['t'].append(datetime.datetime.utcnow())
+        self.tempData['min'].append(float(b['minT'].strip('"')[:-1]))
+        self.tempData['avg'].append(float(b['avgT'].strip('"')[:-1]))
+        self.tempData['max'].append(float(b['maxT'].strip('"')[:-1]))
+        plt.plot(self.tempData['t'], self.tempData['min'])
+        plt.plot(self.tempData['t'], self.tempData['avg'])
+        plt.plot(self.tempData['t'], self.tempData['max'])
+        plt.pause(0.1)
 
+def main(args=None):
+    rclpy.init(args=args)
+    node = FlirGraphNode()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    node.destroy_node()
+    rclpy.shutdown()
 
-def callback(data):
-    #print data
-    boxes = json.loads(data.data)
-    b = boxes[0]
-    print b['minT'],b['avgT'],b['maxT']
-    tempData['t'].append(datetime.datetime.utcnow())
-    tempData['min'].append(float(b['minT'].strip('"')[:-1]))
-    tempData['avg'].append(float(b['avgT'].strip('"')[:-1]))
-    tempData['max'].append(float(b['maxT'].strip('"')[:-1]))
-    plt.plot(tempData['t'],tempData['min'])
-    plt.plot(tempData['t'],tempData['avg'])
-    plt.plot(tempData['t'],tempData['max'])
-    plt.pause(0.1)
-    
 if __name__ == '__main__':
-    rospy.init_node('flir_graph', anonymous=True)
-    rospy.Subscriber('/udp/flir_engine', String, callback)
-    rospy.spin()
-    
+    main()
+

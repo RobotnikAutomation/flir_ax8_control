@@ -1,20 +1,17 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-import rospy
+import rclpy
+from rclpy.node import Node
 from flir_ax8_control import FlirAx8Control
 
-
-def main():
-
-    rospy.init_node("flir_ax8_node")
-
-    rc_node = FlirAx8Control()
-
-    rospy.loginfo('%s: starting' % (rospy.get_name()))
-
-    rc_node.start()
-
+def main(args=None):
+    rclpy.init(args=args)
+    node = FlirAx8Control()
+    node.get_logger().info(f'{node.get_name()}: starting')
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    node.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == "__main__":
     main()

@@ -1,25 +1,32 @@
-#!/usr/bin/env python
 
-import rospy
+import rclpy
+from rclpy.node import Node
 from std_msgs.msg import String
 import flir.flir
 import json
 
-class FlirPublisher:
+class FlirPublisher(Node):
     def __init__(self):
+        super().__init__('flir_engine_node')
         self.flir = flir.flir.Flir()
-        
-    def run(self):
-        pub = rospy.Publisher('flir_engine',String,queue_size=10)
-        rospy.init_node('flir_engine_node')
-        while not rospy.is_shutdown():
-            status = self.flir.getBoxes()
-            pub.publish(json.dumps(status))
-            
-if __name__ == '__main__':
+        self.publisher_ = self.create_publisher(String, 'flir_engine', 10)
+        self.timer = self.create_timer(0.1, self.publish_boxes)
+
+    def publish_boxes(self):
+        status = self.flir.getBoxes()
+        msg = String()
+        msg.data = json.dumps(status)
+        self.publisher_.publish(msg)
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = FlirPublisher()
     try:
-        fp = FlirPublisher()
-        fp.run()
-    except rospy.ROSInterruptException:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
         pass
-    
+    node.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
