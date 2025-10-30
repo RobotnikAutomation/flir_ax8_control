@@ -10,7 +10,7 @@ def generate_launch_description():
         DeclareLaunchArgument('ip_address', default_value='192.168.0.185'),
         Node(
             package='flir_ax8_control',
-            executable='flir_ax8_control_node.py',
+            executable='flir_ax8_control',
             name='flir_ax8_control',
             output='screen',
             parameters=[

@@ -2,11 +2,11 @@ import rclpy
 from rclpy.node import Node
 import threading
 from flir.flir import Flir
-from urllib2 import HTTPError
+from urllib.error import HTTPError
 from flir_ax8_msgs.msg import Alarm, Alarms, Box, Boxes
-from flir_ax8_msgs.srv import GetSpotTemperature, GetSpotTemperatureResponse, SetPalette, SetPaletteResponse
+from flir_ax8_msgs.srv import GetSpotTemperature, SetPalette
 from std_msgs.msg import String
-from std_srvs.srv import Trigger, TriggerResponse, SetBool, SetBoolResponse
+from std_srvs.srv import Trigger, SetBool
 
 class FlirAx8Control(Node):
     """
@@ -149,11 +149,11 @@ class FlirAx8Control(Node):
         for box in boxes:
             box_msg = Box()
             try:
-                box_msg.boxNumber = int(box['boxNumber'])
+                box_msg.box_number = int(box['boxNumber'])
                 box_msg.active = (box['active'] == '"true"')
-                box_msg.minT = float(box['minT'][1:-2])
-                box_msg.maxT = float(box['maxT'][1:-2])
-                box_msg.avgT = float(box['avgT'][1:-2])
+                box_msg.min_t = float(box['minT'][1:-2])
+                box_msg.max_t = float(box['maxT'][1:-2])
+                box_msg.avg_t = float(box['avgT'][1:-2])
                 boxes_msg.boxes.append(box_msg)
             except (KeyError, ValueError) as error:
                 self.get_logger().warn(str(error))
@@ -167,7 +167,7 @@ class FlirAx8Control(Node):
         for alarm in alarms:
             alarm_msg = Alarm()
             try:
-                alarm_msg.alarmNumber = int(alarm['alarmNumber'])
+                alarm_msg.alarm_number = int(alarm['alarmNumber'])
                 alarm_msg.type = alarm['type'][1:-1]
                 alarm_msg.active = (alarm['active'] == '"true"')
                 alarm_msg.trigged = (alarm['trigged'] == '"true"')
@@ -324,7 +324,7 @@ class FlirAx8Control(Node):
         return response
 
     def get_spot_temp_cb(self, req):
-        response = GetSpotTemperatureResponse()
+        response = GetSpotTemperature.Response()
         response.success = True
 
         msg = ""
@@ -341,7 +341,7 @@ class FlirAx8Control(Node):
         return response
 
     def set_palette_cb(self, req):
-        response = SetPaletteResponse()
+        response = SetPalette.Response()
         response.success = True
 
         msg = ""
@@ -360,8 +360,8 @@ class FlirAx8Control(Node):
         return response
 
     def update_boxes(self):
-        if self._initialized == False:
-            return
+        # if self._initialized == False:
+        #     return
 
         boxes = self.flir.getBoxes()
         boxes_msg = Boxes()
@@ -370,14 +370,14 @@ class FlirAx8Control(Node):
             box_msg = Box()
 
             try:
-                box_msg.boxNumber = int(box['boxNumber'])
+                box_msg.box_number = int(box['boxNumber'])
 
                 if (box['active'] == '"true"'):
                     box_msg.active = True
                 
-                box_msg.minT = float(box['minT'][1:-2])
-                box_msg.maxT = float(box['maxT'][1:-2])
-                box_msg.avgT = float(box['avgT'][1:-2])
+                box_msg.min_t = float(box['minT'][1:-2])
+                box_msg.max_t = float(box['maxT'][1:-2])
+                box_msg.avg_t = float(box['avgT'][1:-2])
                 
                 boxes_msg.boxes.append(box_msg)
             except KeyError as e:
@@ -392,8 +392,8 @@ class FlirAx8Control(Node):
         self.t_boxes_updater.start()
     
     def update_alarms(self):
-        if self._initialized == False:
-            return
+        # if self._initialized == False:
+        #     return
 
         alarms = self.flir.getAlarms()
         alarms_msg = Alarms()
@@ -402,7 +402,7 @@ class FlirAx8Control(Node):
             alarm_msg = Alarm()
 
             try:
-                alarm_msg.alarmNumber = int(alarm['alarmNumber'])
+                alarm_msg.alarm_number = int(alarm['alarmNumber'])
                 alarm_msg.type = alarm['type'][1:-1]
 
                 if (alarm['active'] == '"true"'):
@@ -419,3 +419,17 @@ class FlirAx8Control(Node):
         self.t_alarms_updater = threading.Timer(1.0, self.update_alarms)
         self.t_alarms_updater.start()
             
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = FlirAx8Control()
+    node.get_logger().info(f'{node.get_name()}: starting')
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    node.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == "__main__":
+    main()
