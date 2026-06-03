@@ -70,18 +70,19 @@ def KtoC(temp):
     return temp-273.15
 
 class Flir:
-    def __init__(self, baseURL='http://192.168.100.6/', maxBoxes=6, maxAlarms=5):
+    def __init__(self, baseURL='http://192.168.100.6/', maxBoxes=6, maxAlarms=5, timeout=1.0):
         self.baseURL = baseURL
         self.maxBoxes = maxBoxes
         self.maxAlarams = maxAlarms
+        self.timeout = timeout
 
     def setResource(self,resource,value):
         data = urllib.parse.urlencode({'action':'set','resource':resource,'value':value}).encode('utf-8')
-        return urllib.request.urlopen(self.baseURL+'res.php', data).read().decode('utf-8')
+        return urllib.request.urlopen(self.baseURL+'res.php', data, timeout=self.timeout).read().decode('utf-8')
 
     def getResource(self,resource):
         data = urllib.parse.urlencode({'action':'get','resource':resource}).encode('utf-8')
-        return urllib.request.urlopen(self.baseURL+'res.php', data).read().decode('utf-8')
+        return urllib.request.urlopen(self.baseURL+'res.php', data, timeout=self.timeout).read().decode('utf-8')
 
     def setIRMode(self):
         self.setResource('.image.sysimg.fusion.fusionData.fusionMode',1)
